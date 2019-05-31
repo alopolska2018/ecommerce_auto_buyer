@@ -22,7 +22,7 @@ class AllegroAutoBuyer:
 
     def perform(self, auction_number):
         self.search_product_allegro(auction_number)
-        self.buy_allegro()
+        # self.buy_allegro()
         # self.login()
         # sleep(10)
         # self.search()
@@ -55,13 +55,8 @@ class AllegroAutoBuyer:
         sleep(3)
 
     def search_product_allegro(self, auction_number):
-
-        self.browser.find_element_by_xpath(
-            u"(.//*[normalize-space(text()) and normalize-space(.)='Artykuły'])[1]/following::div[22]").click()
-        self.browser.find_element_by_name("string").click()
-        self.browser.find_element_by_name("string").clear()
+        self.browser.find_element_by_css_selector("._d25db_31-XG").send_keys(auction_number)
         sleep(3)
-        self.browser.find_element_by_name("string").send_keys(auction_number)
         self.browser.find_element_by_xpath(
             "(.//*[normalize-space(text()) and normalize-space(.)='Wszystkie kategorie'])[1]/following::button[1]").click()
         sleep(3)
@@ -90,34 +85,28 @@ class AllegroAutoBuyer:
         except NoSuchElementException:
             pass
         sleep(10)
-        self.browser.find_element_by_xpath("/html/body/div[1]/div[2]/section/div/section/ui-view/section/m-confirm-footer/div/section/ng-transclude[2]/m-buttons-section/m-button-footer/div[2]/div[1]/div/div/div/ng-transclude[3]/m-custom-primary-button/buy-button/button/span[2]/span").click()
+        # self.browser.find_element_by_xpath("/html/body/div[1]/div[2]/section/div/section/ui-view/section/m-confirm-footer/div/section/ng-transclude[2]/m-buttons-section/m-button-footer/div[2]/div[1]/div/div/div/ng-transclude[3]/m-custom-primary-button/buy-button/button/span[2]/span").click()
 
 auto_buyer = AllegroAutoBuyer()
-auto_buyer.perform('8129597339')
 
 # auto_buyer.perform('6570839702')
 
 # site = input('Which site you want to buy from [Type: 1 for Allegro]: ')
 #
-# choice = input('Read auctions numbers from file? [y/n]: ')
-#
-# if choice == 'y':
-#
-#     filename = input('Enter filename [ex. auctions.txt]: ')
-#     auction_numbers = auto_buyer.read_file(filename)
-#
-#     for auction in auction_numbers:
-#         auto_buyer.perform(auction)
-#
-# elif choice == 'n':
-#
-#     auction = input('Enter auction number: ')
-#     auto_buyer.perform(auction)
-#
-# else:
-#     print('Wrong choice')
+choice = input('Read auctions numbers from file? [y/n]: ')
 
+if choice == 'y':
 
+    filename = input('Enter filename [{file must be inside script dir} ex. auctions.txt]: ')
+    auction_numbers = auto_buyer.read_file(filename)
 
+    for auction in auction_numbers:
+        auto_buyer.perform(auction)
 
-# auction_numbers = auto_buyer.read_file('test.txt')
+elif choice == 'n':
+
+    auction = input('Enter auction number: ')
+    auto_buyer.perform(auction)
+
+else:
+    print('Wrong choice')
