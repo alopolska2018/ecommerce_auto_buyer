@@ -69,24 +69,9 @@ class AllegroAutoBuyer:
         # self.browser.find_element_by_name("quantity").send_keys("1")
         self.browser.find_element_by_xpath(
             "(.//*[normalize-space(text()) and normalize-space(.)='Dodaj do koszyka'])[1]/following::button[1]").click()
-        sleep(3)
-        try:
-            self.browser.find_element_by_xpath('/html/body/div[1]/div[2]/section/div/section/ui-view/section/form/delivery-section/section/section/ng-form/delivery-bundle/div[3]/section/div/delivery-methods-groups-list/section/ng-form/div[1]/div/div/div[1]/div/div/label/span').click()
-        except NoSuchElementException:
-            pass
-        sleep(3)
 
-        try:
-            self.browser.find_element_by_xpath('/html/body/div[1]/div[2]/section/div/section/ui-view/section/form/section[2]/payments-methods/ng-form/div[1]/m-soap-group/div/m-payment-soap[1]/m-soap/div[2]/label/div[2]/div/div').click
-        except NoSuchElementException:
-            pass
-        sleep(3)
-        try:
-            self.browser.find_element_by_xpath(u"(.//*[normalize-space(text()) and normalize-space(.)='Będziesz mógł sprawdzić wszystkie dane zanim dokonasz zakupu.'])[1]/following::button[1]").click()
-        except NoSuchElementException:
-            pass
-        sleep(10)
-        # self.browser.find_element_by_xpath("/html/body/div[1]/div[2]/section/div/section/ui-view/section/m-confirm-footer/div/section/ng-transclude[2]/m-buttons-section/m-button-footer/div[2]/div[1]/div/div/div/ng-transclude[3]/m-custom-primary-button/buy-button/button/span[2]/span").click()
+        sleep(5)
+        self.browser.find_element_by_xpath("/html/body/div[1]/div[2]/section/div/section/ui-view/section/m-confirm-footer/div/section/ng-transclude[2]/m-buttons-section/m-button-footer/div[2]/div[1]/div/div/div/ng-transclude[3]/m-custom-primary-button/buy-button/button/span[2]/span").click()
 
     def home_page(self):
         self.browser.get('https://allegro.pl/')
