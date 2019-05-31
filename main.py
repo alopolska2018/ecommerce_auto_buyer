@@ -22,7 +22,8 @@ class AllegroAutoBuyer:
 
     def perform(self, auction_number):
         self.search_product_allegro(auction_number)
-        # self.buy_allegro()
+        self.buy_allegro()
+        self.home_page()
         # self.login()
         # sleep(10)
         # self.search()
@@ -86,6 +87,11 @@ class AllegroAutoBuyer:
             pass
         sleep(10)
         # self.browser.find_element_by_xpath("/html/body/div[1]/div[2]/section/div/section/ui-view/section/m-confirm-footer/div/section/ng-transclude[2]/m-buttons-section/m-button-footer/div[2]/div[1]/div/div/div/ng-transclude[3]/m-custom-primary-button/buy-button/button/span[2]/span").click()
+
+    def home_page(self):
+        self.browser.get('https://allegro.pl/')
+
+
 
 auto_buyer = AllegroAutoBuyer()
 
