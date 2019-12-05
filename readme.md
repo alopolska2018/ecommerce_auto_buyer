@@ -8,4 +8,4 @@ or if on windows add geckodriver to environment variables. as per instruction: h
 3.Use 'pip install -r requirements.txt' command in order to install all dependencies.
 In order for script to work:
 1.Make first transaction yourself, using card, saving the details.
-2.If reading from file, split each auction number by enter.
+2.If reading from file split each auction number by enter.
