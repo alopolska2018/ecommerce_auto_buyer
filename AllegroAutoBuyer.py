@@ -22,9 +22,7 @@ class AllegroAutoBuyer:
         self.search_product_allegro(auction_number)
         self.buy_allegro()
         self.home_page()
-        # self.login()
-        # sleep(10)
-        # self.search()
+
 
     def read_file(self, filename):
 
@@ -54,8 +52,8 @@ class AllegroAutoBuyer:
         sleep(3)
 
     def search_product_allegro(self, auction_number):
-        # self.browser.find_element_by_css_selector("._d25db_31-XG").send_keys(auction_number)
-        self.browser.find_element_by_xpath("/html/body/div[2]/div[3]/nav/div/div[1]/div/div/form/input").send_keys(auction_number)
+        sleep(5)
+        self.browser.find_element_by_xpath('//*[contains(concat( " ", @class, " " ), concat( " ", "_14uqc", " " ))]').send_keys(auction_number)
         sleep(3)
         self.browser.find_element_by_xpath(
             "(.//*[normalize-space(text()) and normalize-space(.)='Wszystkie kategorie'])[1]/following::button[1]").click()
@@ -77,8 +75,10 @@ class AllegroAutoBuyer:
         sleep(5)
 
         self.browser.find_element_by_xpath('/html/body/div/div[2]/section/div/section/ui-view/section/section/section/form/section[2]/payments-methods/ng-form/div/m-soap-group/div/m-payment-soap[1]/m-soap/div[2]/label/div[2]/div/div').click()
+        sleep(3)
         self.browser.find_element_by_xpath(
             u"(.//*[normalize-space(text()) and normalize-space(.)='Płacę z iPKO'])[1]/following::div[4]").click()
+        sleep(3)
         try:
             self.browser.find_element_by_xpath("/html/body/div/div[2]/section/div/section/ui-view/section/section/section/form/section[2]/payments-methods/ng-form/div/m-soap-group/div/m-payment-soap[1]/m-soap/div[2]/label/div[2]/div/div").click()
         except NoSuchElementException:
