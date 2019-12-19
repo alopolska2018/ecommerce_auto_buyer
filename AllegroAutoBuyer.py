@@ -5,14 +5,17 @@ from selenium.common.exceptions import NoSuchElementException
 
 class AllegroAutoBuyer:
 
-    def __init__(self):
-        self.login = 'lisi3ck4@gmail.com'
-        self.password = 'StarWarsVader2020!'
-        # self.website = input('Enter auction number: ')
-        # self.user = input('choose account to use [Type 1 for : ugreen]')
+    def __init__(self, login, password):
+        self.login = login
+        self.password = password
         self.options = Options()
         self.options.headless = False
-        self.browser = webdriver.Firefox(options=self.options)
+        self.browser_locale = 'pl'
+        self.profile = webdriver.FirefoxProfile()
+        self.profile.set_preference('intl.accept_languages', self.browser_locale)
+
+        self.browser = webdriver.Firefox(options=self.options, firefox_profile=self.profile)
+        self.browser.delete_all_cookies()
         self.browser.set_window_size(1800, 600)
         self.browser.set_window_position(0, 0)
         self.accept_next_alert = True
@@ -21,26 +24,14 @@ class AllegroAutoBuyer:
     def perform(self, auction_number):
         self.search_product_allegro(auction_number)
         self.buy_allegro()
-        self.home_page()
+        self.close_browser()
 
-
-    def read_file(self, filename):
-
-        file = open(filename, 'r')
-
-        auction_numbers = []
-
-        for line in file:
-            line = line.strip()
-            auction_numbers.append(line)
-
-        return auction_numbers
 
     def allegro_log_in(self):
         self.browser.get(
             "https://allegro.pl/login/form?authorization_uri=https:%2F%2Fallegro.pl%2Fauth%2Foauth%2Fauthorize%3Fclient_id%3Dtb5SFf3cRxEyspDN%26redirect_uri%3Dhttps:%2F%2Fallegro.pl%2Flogin%2Fauth%3Forigin_url%253D%25252F%26response_type%3Dcode%26state%3DpvLd4b&oauth=true")
 
-        self.browser.find_element_by_xpath('/html/body/div[1]/div[3]/div/div[2]/div/div/div/div[2]/button[2]').click()
+        self.browser.find_element_by_xpath('/html/body/div[1]/div[3]/div/div[2]/div/div[2]/button[2]').click()
 
         self.browser.find_element_by_id("username").clear()
         self.browser.find_element_by_id("username").send_keys(self.login)
@@ -85,5 +76,9 @@ class AllegroAutoBuyer:
             pass
         sleep(5)
         self.browser.find_element_by_xpath("/html/body/div/div[2]/section/div/section/ui-view/section/section/aside/div/div/summary-panel/section/section[3]/div/div/buy-button/button/span[2]/span").click()
+
     def home_page(self):
         self.browser.get('https://allegro.pl/')
+
+    def close_browser(self):
+        self.browser.close()
