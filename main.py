@@ -7,6 +7,7 @@ from time import sleep
 import keyring
 import json
 
+#TODO https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-nic-in-python
 
 def read_file(filename):
     file = open(filename, 'r')
@@ -43,57 +44,60 @@ def decrease_by_percentage(number, percentage):
     result = number - (float(number)/100 * float(percentage))
     return result
 
-def modify_price(auction_number, login, password):
+def modify_price_and_buy(auction_number, login, password, json_accounts):
     allegro_price_checker = GetAllFieldsOfTheParticularOffer()
     allegro_price_modifier = ModifyBuyNowPrice()
     percentage_decrease = input('What percentage do you want to decrease price by:  ')
     account_name = input('Provide allegro account name you are going to buy from: ')
     percentage_decrease = float(percentage_decrease)
-    auto_buyer = AllegroAutoBuyer(login, password)
+
+    change_ip_for_request(json_accounts)
 
     msg = 'Chosen account: {}'.format(account_name)
-    print(msg)
-    logger.info(msg)
+    print_and_log(msg)
     original_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
     msg = 'Orginal price: {}'.format(original_price)
-    print(msg)
-    logger.info(msg)
+    print_and_log(msg)
     modified_price = int(decrease_by_percentage(original_price, percentage_decrease))
     msg = 'Modified price: {}'.format(modified_price)
-    print(msg)
-    logger.info(msg)
+    print_and_log(msg)
     allegro_price_modifier.modify_price(auction_number, modified_price, account_name)
     msg = 'price has been modified'
-    print(msg)
-    logger.info(msg)
+    print_and_log(msg)
     current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
     while current_price != modified_price:
         sleep(120)
         msg = 'current_price: {} is not equal modified price: {}'.format(current_price, modified_price)
-        print(msg)
-        logger.error(msg)
+        print_and_log(msg, 'error')
         current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
     msg = 'current price {}'.format(current_price)
-    print(msg)
-    logger.info(msg)
+    print_and_log(msg)
 
+    change_ip(login, json_accounts)
+    auto_buyer = AllegroAutoBuyer(login, password)
     auto_buyer.perform(auction_number)
 
+    change_ip_for_request(json_accounts)
     allegro_price_modifier.increase_price(original_price, auction_number, account_name)
     current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
     while current_price != original_price:
         msg = 'current_price: {} is not equal original price: {}. Change price manually'.format(current_price,
                                                                                                 original_price)
-        print(msg)
-        logger.error(msg)
+        print_and_log(msg, 'error')
         input('Price changed? [type y to continue]')
         current_price = allegro_price_checker.get_offer_price(auction_number, account_name)
     msg = 'original price restored, current price: {}'.format(current_price)
-    print(msg)
-    logger.info(msg)
+    print_and_log(msg)
 
 def get_config_name(login, json_accounts):
     return json_accounts[login]
+
+def print_and_log(msg,log_type='info'):
+    print(msg)
+    if log_type == 'info':
+        logger.info(msg)
+    else:
+        logger.error(msg)
 
 def change_ip(login, json_accounts):
     config_name = get_config_name(login, json_accounts)
@@ -122,6 +126,9 @@ def change_ip(login, json_accounts):
         logger.error(msg)
         input('Type y if you disconnected manually: ')
         already_connected = vpn.check_connection()
+#changes ip in order to make request with different ip than the one buying from
+def change_ip_for_request(json_accounts):
+    change_ip('request_ip', json_accounts)
 
 def run():
     filename = input('Enter filename [{file must be inside script dir} ex. auctions.txt]: ')
@@ -139,16 +146,13 @@ def run():
                 n = 0
             login = get_account_login(accounts_list, n)
             password = get_account_password(login)
-            change_ip(login, json_accounts)
 
             n += 1
             msg = 'Auction number: {}'.format(auction_number)
-            print(msg)
-            logger.info(msg)
+            print_and_log(msg)
             msg = 'User buying: {}'.format(login)
-            print(msg)
-            logger.info(msg)
-            modify_price(auction_number, login, password)
+            print_and_log(msg)
+            modify_price_and_buy(auction_number, login, password, json_accounts)
 
     elif choice == 'n':
         auction_numbers = read_file(filename)
@@ -161,11 +165,9 @@ def run():
             auto_buyer = AllegroAutoBuyer(login, password)
             n += 1
             msg = 'Auction number: {}'.format(auction_number)
-            print(msg)
-            logger.info(msg)
+            print_and_log(msg)
             msg = 'User buying: {}'.format(login)
-            print(msg)
-            logger.info(msg)
+            print_and_log(msg)
             auto_buyer.perform(auction_number)
     else:
         print('Wrong choice')
