@@ -7,6 +7,7 @@ from time import sleep
 import keyring
 import json
 
+REQUEST_CONFIG_NAME = 'pl24.nordvpn.com.tcp'
 #TODO https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-nic-in-python
 
 def read_file(filename):
@@ -51,7 +52,7 @@ def modify_price_and_buy(auction_number, login, password, json_accounts):
     account_name = input('Provide allegro account name you are going to buy from: ')
     percentage_decrease = float(percentage_decrease)
 
-    change_ip_for_request(json_accounts)
+    change_ip_for_request()
 
     msg = 'Chosen account: {}'.format(account_name)
     print_and_log(msg)
@@ -73,11 +74,12 @@ def modify_price_and_buy(auction_number, login, password, json_accounts):
     msg = 'current price {}'.format(current_price)
     print_and_log(msg)
 
-    change_ip(login, json_accounts)
+    config_name = get_config_name(login, json_accounts)
+    change_ip(config_name)
     auto_buyer = AllegroAutoBuyer(login, password)
     auto_buyer.perform(auction_number)
 
-    change_ip_for_request(json_accounts)
+    change_ip_for_request()
     allegro_price_modifier.increase_price(original_price, auction_number, account_name)
     current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
     while current_price != original_price:
@@ -99,8 +101,7 @@ def print_and_log(msg,log_type='info'):
     else:
         logger.error(msg)
 
-def change_ip(login, json_accounts):
-    config_name = get_config_name(login, json_accounts)
+def change_ip(config_name):
     vpn = OpenVpn(config_name)
     already_connected = vpn.check_connection()
     #TODO after few tries return error
@@ -127,8 +128,8 @@ def change_ip(login, json_accounts):
         input('Type y if you disconnected manually: ')
         already_connected = vpn.check_connection()
 #changes ip in order to make request with different ip than the one buying from
-def change_ip_for_request(json_accounts):
-    change_ip('request_ip', json_accounts)
+def change_ip_for_request():
+    change_ip(REQUEST_CONFIG_NAME)
 
 def run():
     filename = input('Enter filename [{file must be inside script dir} ex. auctions.txt]: ')
@@ -161,7 +162,9 @@ def run():
                 n = 0
             login = get_account_login(accounts_list, n)
             password = get_account_password(login)
-            change_ip(login, json_accounts)
+
+            config_name = get_config_name(login, json_accounts)
+            change_ip(config_name)
             auto_buyer = AllegroAutoBuyer(login, password)
             n += 1
             msg = 'Auction number: {}'.format(auction_number)
