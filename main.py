@@ -45,11 +45,9 @@ def decrease_by_percentage(number, percentage):
     result = number - (float(number)/100 * float(percentage))
     return result
 
-def modify_price_and_buy(auction_number, login, password, json_accounts):
+def modify_price_and_buy(auction_number, login, password, json_accounts, percentage_decrease, account_name):
     allegro_price_checker = GetAllFieldsOfTheParticularOffer()
     allegro_price_modifier = ModifyBuyNowPrice()
-    percentage_decrease = input('What percentage do you want to decrease price by:  ')
-    account_name = input('Provide allegro account name you are going to buy from: ')
     percentage_decrease = float(percentage_decrease)
 
     change_ip_for_request()
@@ -136,11 +134,24 @@ def run():
     logger.info('Chosen file {}'.format(filename))
     choice = input('Modify price of auctions? [y/n]: ')
     logger.info('Modified price option= {}'.format(choice))
+    #id of login being used
     n = 0
+    #number of product to buy per login
+    NUMBER_OF_PRODUCTS = 5
+    #id of product
+    k = 0
+
     json_accounts = read_json_file('accounts.json')
     accounts_list = get_accounts_list(json_accounts)
 
     if choice == 'y':
+        percentage_decrease = input('What percentage do you want to decrease price by:  ')
+        account_name = input('Provide allegro account name you are going to buy from: ')
+        msg = 'Percentage decrease: {}'.format(percentage_decrease)
+        print_and_log(msg)
+        msg = 'Account buying from: {}'.format(account_name)
+        print_and_log(msg)
+
         auction_numbers = read_file(filename)
         for auction_number in auction_numbers:
             if n == len(accounts_list):
@@ -148,29 +159,49 @@ def run():
             login = get_account_login(accounts_list, n)
             password = get_account_password(login)
 
-            n += 1
-            msg = 'Auction number: {}'.format(auction_number)
-            print_and_log(msg)
+            if k == NUMBER_OF_PRODUCTS:
+                n += 1
+            k += 1
+
             msg = 'User buying: {}'.format(login)
             print_and_log(msg)
-            modify_price_and_buy(auction_number, login, password, json_accounts)
+            msg = 'Auction number: {}'.format(auction_number)
+            print_and_log(msg)
+            link_to_auction = 'https://allegro.pl/oferta/{}'.format(auction_number)
+            msg = 'Link to auction: {}'.format(link_to_auction)
+            print_and_log(msg)
+
+            modify_price_and_buy(auction_number, login, password, json_accounts, percentage_decrease, account_name)
 
     elif choice == 'n':
+        # login = get_account_login(accounts_list, n)
+        # password = get_account_password(login)
+        # config_name = get_config_name(login, json_accounts)
+        # change_ip(config_name)
         auction_numbers = read_file(filename)
         for auction_number in auction_numbers:
             if n == len(accounts_list):
                 n = 0
+
+
+
+            # if k == NUMBER_OF_PRODUCTS:
             login = get_account_login(accounts_list, n)
             password = get_account_password(login)
-
             config_name = get_config_name(login, json_accounts)
             change_ip(config_name)
-            auto_buyer = AllegroAutoBuyer(login, password)
             n += 1
-            msg = 'Auction number: {}'.format(auction_number)
-            print_and_log(msg)
+
+            k += 1
+
             msg = 'User buying: {}'.format(login)
             print_and_log(msg)
+            msg = 'Auction number: {}'.format(auction_number)
+            print_and_log(msg)
+            link_to_auction = 'https://allegro.pl/oferta/{}'.format(auction_number)
+            msg = 'Link to auction: {}'.format(link_to_auction)
+            print_and_log(msg)
+            auto_buyer = AllegroAutoBuyer(login, password)
             auto_buyer.perform(auction_number)
     else:
         print('Wrong choice')

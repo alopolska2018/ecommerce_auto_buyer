@@ -114,11 +114,6 @@ class Submit_Feedback():
         with open('feedback_log', 'wb') as file:
             pickle.dump(feedback_dict, file)
 
-    # def save_last_exec_time(self):
-    #     with open('last_feedback.json', 'w') as f:
-    #         feedback_json = json.loads(f)
-    #         last_feedback_json[login]
-
     def perform(self):
         today = date.today()
         accounts_list = self.get_list_of_accounts()
@@ -141,20 +136,20 @@ class Submit_Feedback():
                 self.change_ip(config_name)
                 password = self.get_account_password(login)
                 allegro = AllegroAutoBuyer(login, password)
-                allegro.submit_feedback()
-                feedback_dict[login] = today
+                #submit_feedback returns True if was able to submit feedback, if no feedback was available to submit return False
+                flag = allegro.submit_feedback()
+                if flag:
+                    feedback_dict[login] = today
             else:
                 config_name = self.get_config_name(login, accounts_list)
                 self.change_ip(config_name)
                 last_submission = feedback_dict[login]
                 elapsed = today - last_submission
                 if elapsed >= datetime.timedelta(days=7):
-                    self.login = login
-                    self.password = self.get_account_password(login)
-                    self.allegro_log_in()
-                    self.submit_feedback()
+                    password = self.get_account_password(login)
+                    allegro = AllegroAutoBuyer(login, password)
+                    allegro.submit_feedback()
                     feedback_dict[login] = today
-            allegro.close_browser()
             self.save_feedback(feedback_dict)
 
 if __name__ == "__main__":
