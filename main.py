@@ -56,7 +56,7 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
     msg = 'Chosen account: {}'.format(account_name)
     print_and_log(msg)
     original_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
-    msg = 'Orginal price: {}'.format(original_price)
+    msg = 'Original price: {}'.format(original_price)
     print_and_log(msg)
     modified_price = int(decrease_by_percentage(original_price, percentage_decrease))
     msg = 'Modified price: {}'.format(modified_price)
@@ -93,7 +93,7 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
         print_and_log(msg, 'error')
         input('Price changed? [type y to continue]')
         current_price = allegro_price_checker.get_offer_price(auction_number, account_name)
-    msg = 'original price restored, current price: {}'.format(current_price)
+    msg = 'Original price restored, current price: {}'.format(current_price)
     print_and_log(msg)
 
 def get_config_name(login, json_accounts):
