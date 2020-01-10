@@ -96,6 +96,11 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
     msg = 'Original price restored, current price: {}'.format(current_price)
     print_and_log(msg)
 
+def buy(auction_number, login, password):
+    auto_buyer = AllegroAutoBuyer(login, password)
+    auto_buyer.buy_with_login(auction_number)
+    auto_buyer.close_browser()
+
 def get_config_name(login, json_accounts):
     return json_accounts[login]
 
@@ -191,9 +196,12 @@ def run():
             link_to_auction = 'https://allegro.pl/oferta/{}'.format(auction_number)
             msg = 'Link to auction: {}'.format(link_to_auction)
             print_and_log(msg)
-            auto_buyer = AllegroAutoBuyer(login, password)
-            auto_buyer.buy_with_login(auction_number)
-            auto_buyer.close_browser()
+
+            try:
+                buy(auction_number, login, password)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                print(e)
             n += 1
     else:
         print('Wrong choice')
