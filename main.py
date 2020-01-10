@@ -6,6 +6,7 @@ from log.setup_logger import logger
 from time import sleep
 import keyring
 import json
+import traceback
 
 REQUEST_CONFIG_NAME = 'pl24.nordvpn.com.tcp'
 #TODO https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-nic-in-python
@@ -75,7 +76,13 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
     config_name = get_config_name(login, json_accounts)
     change_ip(config_name)
     auto_buyer = AllegroAutoBuyer(login, password)
-    auto_buyer.perform(auction_number)
+    try:
+        auto_buyer.buy_with_login(auction_number)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        print(e)
+
+    auto_buyer.close_browser()
 
     change_ip_for_request()
     allegro_price_modifier.increase_price(original_price, auction_number, account_name)
@@ -136,10 +143,6 @@ def run():
     logger.info('Modified price option= {}'.format(choice))
     #id of login being used
     n = 0
-    #number of product to buy per login
-    NUMBER_OF_PRODUCTS = 5
-    #id of product
-    k = 0
 
     json_accounts = read_json_file('accounts.json')
     accounts_list = get_accounts_list(json_accounts)
@@ -159,10 +162,6 @@ def run():
             login = get_account_login(accounts_list, n)
             password = get_account_password(login)
 
-            if k == NUMBER_OF_PRODUCTS:
-                n += 1
-            k += 1
-
             msg = 'User buying: {}'.format(login)
             print_and_log(msg)
             msg = 'Auction number: {}'.format(auction_number)
@@ -172,27 +171,18 @@ def run():
             print_and_log(msg)
 
             modify_price_and_buy(auction_number, login, password, json_accounts, percentage_decrease, account_name)
+            n+=1
 
     elif choice == 'n':
-        # login = get_account_login(accounts_list, n)
-        # password = get_account_password(login)
-        # config_name = get_config_name(login, json_accounts)
-        # change_ip(config_name)
         auction_numbers = read_file(filename)
         for auction_number in auction_numbers:
             if n == len(accounts_list):
                 n = 0
-
-
-
             # if k == NUMBER_OF_PRODUCTS:
             login = get_account_login(accounts_list, n)
             password = get_account_password(login)
             config_name = get_config_name(login, json_accounts)
             change_ip(config_name)
-            n += 1
-
-            k += 1
 
             msg = 'User buying: {}'.format(login)
             print_and_log(msg)
@@ -202,7 +192,9 @@ def run():
             msg = 'Link to auction: {}'.format(link_to_auction)
             print_and_log(msg)
             auto_buyer = AllegroAutoBuyer(login, password)
-            auto_buyer.perform(auction_number)
+            auto_buyer.buy_with_login(auction_number)
+            auto_buyer.close_browser()
+            n += 1
     else:
         print('Wrong choice')
 
