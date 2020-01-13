@@ -1,4 +1,5 @@
 import subprocess, os
+from log.setup_logger import logger
 #TODO fix command injection from user
 class OpenVpn():
     def __init__(self, config_name):
@@ -36,6 +37,10 @@ class OpenVpn():
         if return_code == 0:
             return True
         else:
+            msg = 'Failed to connect using config: '.format(self.config_name)
+            logger.error(msg)
+            print(msg)
+
             for config in reversed(backup_config):
                 self.config_name = config
                 cmd = 'ConnectOpenVPN.exe /connect /adapter "{}" /config "{}"'.format(self.adapter_name,
@@ -45,6 +50,10 @@ class OpenVpn():
                 return_code = output.returncode
                 if return_code == 0:
                     return True
+                else:
+                    msg = 'Failed to connect using config: '.format(self.config_name)
+                    logger.error(msg)
+                    print(msg)
             return False
 
     def disconnect(self):

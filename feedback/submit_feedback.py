@@ -7,7 +7,7 @@ from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime, date
 import datetime
-import re, json
+import re, json, os
 from pathlib import Path
 import pickle
 
@@ -141,11 +141,11 @@ class Submit_Feedback():
                 if flag:
                     feedback_dict[login] = today
             else:
-                config_name = self.get_config_name(login, accounts_list)
-                self.change_ip(config_name)
                 last_submission = feedback_dict[login]
                 elapsed = today - last_submission
-                if elapsed >= datetime.timedelta(days=7):
+                if elapsed >= datetime.timedelta(days=0):
+                    config_name = self.get_config_name(login, accounts_list)
+                    self.change_ip(config_name)
                     password = self.get_account_password(login)
                     allegro = AllegroAutoBuyer(login, password)
                     allegro.submit_feedback()
@@ -153,4 +153,5 @@ class Submit_Feedback():
             self.save_feedback(feedback_dict)
 
 if __name__ == "__main__":
+    print(os.getcwd())
     feedback = Submit_Feedback()
