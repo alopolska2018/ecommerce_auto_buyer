@@ -1,6 +1,7 @@
-import logging, os, pathlib
+import logging, pathlib
 
-log_fname = pathlib.Path(os.getcwd(), 'ecommerce_auto_buyer_log.log')
+main_dir = pathlib.Path().absolute()
+log_fname = '{}/log_files/ecommerce_auto_buyer.log'.format(main_dir)
 
 logging.basicConfig(filename=log_fname, level=logging.INFO,
                             format='%(asctime)s:%(levelname)s:%(message)s')

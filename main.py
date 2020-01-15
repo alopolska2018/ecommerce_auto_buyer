@@ -200,7 +200,6 @@ def run():
                 logger.error(traceback.format_exc())
                 print(e)
             n += 1
-
             auto_buyer.close_browser()
     else:
         print('Wrong choice')

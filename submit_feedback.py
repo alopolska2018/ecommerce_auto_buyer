@@ -1,20 +1,35 @@
 from AllegroAutoBuyer import AllegroAutoBuyer
+# from allegro_auto_buyer.AllegroAutoBuyer import AllegroAutoBuyer
 from openvpn.OpenVpn import OpenVpn
 import keyring
-from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
-from time import sleep
-from selenium.common.exceptions import NoSuchElementException
 from datetime import datetime, date
 import datetime
-import re, json, os
-from pathlib import Path
+import re, json
 import pickle
+import logging, pathlib
+
+MAIN_DIR = pathlib.Path().absolute()
 
 class Submit_Feedback():
+    
     def __init__(self):
+        self.logger = logging.Logger('feedback_log')
+        self.logger.setLevel(logging.INFO)
+        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+
+        main_dir = pathlib.Path().absolute()
+        fh = logging.FileHandler('{}/log_files/feedback.log'.format(main_dir))
+        fh.setFormatter(formatter)
+        self.logger.addHandler(fh)
         self.perform()
 
+    def print_and_log(self, msg, log_type='info'):
+        print(msg)
+        if log_type == 'info':
+            self.logger.info(msg)
+        else:
+            self.logger.error(msg)
+        
     def get_config_name(self, login, json_accounts):
         return json_accounts[login]
 
@@ -79,21 +94,6 @@ class Submit_Feedback():
         allegro_date_difference = today - allegro_date_object
         return allegro_date_difference.days
 
-    def allegro_log_in(self):
-        self.browser.get(
-            "https://allegro.pl/login/form?authorization_uri=https:%2F%2Fallegro.pl%2Fauth%2Foauth%2Fauthorize%3Fclient_id%3Dtb5SFf3cRxEyspDN%26redirect_uri%3Dhttps:%2F%2Fallegro.pl%2Flogin%2Fauth%3Forigin_url%253D%25252F%26response_type%3Dcode%26state%3DpvLd4b&oauth=true")
-
-        self.browser.find_element_by_xpath('/html/body/div[1]/div[3]/div/div[2]/div/div[2]/button[2]').click()
-
-        self.browser.find_element_by_id("username").clear()
-        self.browser.find_element_by_id("username").send_keys(self.login)
-        sleep(3)
-        self.browser.find_element_by_id("password").clear()
-        self.browser.find_element_by_id("password").send_keys(self.password)
-        sleep(3)
-        self.browser.find_element_by_id("login-button").click()
-        sleep(3)
-
     def get_list_of_accounts(self):
         with open('accounts.json', 'r') as json_file:
             json_data = json.load(json_file)
@@ -106,12 +106,12 @@ class Submit_Feedback():
     #return dict of login and date of last submitted feedback,
     #for every login feedback can be submitted only once in 7days
     def get_feedback_dict(self):
-        with open('feedback_log', 'rb') as file:
+        with open('{}/log/feedback_dict'.format(MAIN_DIR), 'rb') as file:
             feedback_dict = pickle.load(file)
             return feedback_dict
 
     def save_feedback(self, feedback_dict):
-        with open('feedback_log', 'wb') as file:
+        with open('{}/log/feedback_dict'.format(MAIN_DIR), 'wb') as file:
             pickle.dump(feedback_dict, file)
 
     def perform(self):
@@ -131,27 +131,38 @@ class Submit_Feedback():
             feedback_dict[login] = today
 
         for login in accounts_list.keys():
+            config_name = self.get_config_name(login, accounts_list)
+            msg = 'Using config: {}'.format(config_name)
+            self.print_and_log(msg)
+            password = self.get_account_password(login)
+            
             if login not in feedback_dict.keys():
-                config_name = self.get_config_name(login, accounts_list)
                 self.change_ip(config_name)
-                password = self.get_account_password(login)
                 allegro = AllegroAutoBuyer(login, password)
                 #submit_feedback returns True if was able to submit feedback, if no feedback was available to submit return False
                 flag = allegro.submit_feedback()
                 if flag:
                     feedback_dict[login] = today
+                    msg = 'Feedback submitted login: {}'.format(login)
+                    self.print_and_log(msg)
+                else:
+                    msg = 'Feedback not submitted login: {}'.format(login)
+                    self.print_and_log(msg)
             else:
                 last_submission = feedback_dict[login]
                 elapsed = today - last_submission
-                if elapsed >= datetime.timedelta(days=0):
-                    config_name = self.get_config_name(login, accounts_list)
+                if elapsed >= datetime.timedelta(days=7):
                     self.change_ip(config_name)
-                    password = self.get_account_password(login)
                     allegro = AllegroAutoBuyer(login, password)
-                    allegro.submit_feedback()
-                    feedback_dict[login] = today
+                    flag = allegro.submit_feedback()
+                    if flag:
+                        feedback_dict[login] = today
+                        msg = 'Feedback submitted login: {}'.format(login)
+                        self.print_and_log(msg)
+                    else:
+                        msg = 'Feedback not submitted login: {}'.format(login)
+                        self.print_and_log(msg)
             self.save_feedback(feedback_dict)
 
 if __name__ == "__main__":
-    print(os.getcwd())
     feedback = Submit_Feedback()

@@ -1,6 +1,6 @@
 accounts.json
 auctions.txt
 ecommerce_auto_buyer_log.log
-feedback_log
+log_files/feedback_dict
 geckodriver.exe
 test.py
