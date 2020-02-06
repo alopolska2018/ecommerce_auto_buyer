@@ -151,7 +151,7 @@ class Submit_Feedback():
             else:
                 last_submission = feedback_dict[login]
                 elapsed = today - last_submission
-                if elapsed >= datetime.timedelta(days=7):
+                if elapsed >= datetime.timedelta(days=8):
                     self.change_ip(config_name)
                     allegro = AllegroAutoBuyer(login, password)
                     flag = allegro.submit_feedback()

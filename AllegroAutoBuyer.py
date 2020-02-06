@@ -67,16 +67,20 @@ class AllegroAutoBuyer:
 
     def fill_buying_form(self):
         try:
-            self.browser.find_element_by_xpath('//span[text()=\'List polecony ekonomiczny\']').click()
-        except Exception:
             self.browser.find_element_by_xpath('//span[text()=\'List ekonomiczny\']').click()
+        except Exception:
+            try:
+                self.browser.find_element_by_xpath('//span[text()=\'List polecony priorytetowy\']').click()
+            except Exception:
+                self.browser.find_element_by_xpath('//span[text()=\'List polecony ekonomiczny\']')
+
         sleep(3)
         self.browser.find_element_by_xpath('//div[contains(@class, \'cash-transfer\')]').click()
         sleep(3)
         self.browser.find_element_by_xpath('//div[contains(text(),\'Płacę przelewem tradycyjnym\')]').click()
         sleep(3)
         self.browser.find_element_by_xpath('//span[contains(text(),\'kupuję i płacę\')]').click()
-        sleep(3)
+        sleep(5)
 
     def home_page(self):
         self.browser.get('https://allegro.pl/')

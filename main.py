@@ -44,6 +44,8 @@ def get_account_password(login):
 
 def decrease_by_percentage(number, percentage):
     result = number - (float(number)/100 * float(percentage))
+    if result < 1:
+        result = 1
     return result
 
 def modify_price_and_buy(auction_number, login, password, json_accounts, percentage_decrease, account_name):
