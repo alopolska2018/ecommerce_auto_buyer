@@ -95,13 +95,24 @@ class Submit_Feedback():
         return allegro_date_difference.days
 
     def get_list_of_accounts(self):
-        with open('accounts.json', 'r') as json_file:
-            json_data = json.load(json_file)
-            return json_data
+        with open('alopl_accounts.json', 'r') as json_file:
+            alopl = json.load(json_file)
+        with open('czemutaktanio_accounts.json', 'r') as json_file:
+            czemutaktanio = json.load(json_file)
+        accounts = {**alopl, **czemutaktanio}
+        return accounts
+
+    def save_acounts_pasword(self, login, password):
+        keyring.set_password('allegro', '{}'.format(login), '{}'.format(password))
 
     def get_account_password(self, login):
         password = keyring.get_password('allegro', login)
-        return password
+        if password:
+            return password
+        else:
+            password = input('No existing pasword for login: {}. Please provide password: '.format(login))
+            self.save_acounts_pasword(login, password)
+            return password
 
     #return dict of login and date of last submitted feedback,
     #for every login feedback can be submitted only once in 7days
@@ -132,7 +143,7 @@ class Submit_Feedback():
 
         for login in accounts_list.keys():
             config_name = self.get_config_name(login, accounts_list)
-            msg = 'Using config: {}'.format(config_name)
+            msg = 'Trying login: {} with config: {}'.format(login, config_name)
             self.print_and_log(msg)
             password = self.get_account_password(login)
             
@@ -150,7 +161,12 @@ class Submit_Feedback():
                     self.print_and_log(msg)
             else:
                 last_submission = feedback_dict[login]
+                msg = 'Last submission {}'.format(last_submission)
+                self.print_and_log(msg)
                 elapsed = today - last_submission
+                last_submission = feedback_dict[login]
+                msg = 'Time elapsed {}'.format(elapsed)
+                self.print_and_log(msg)
                 if elapsed >= datetime.timedelta(days=8):
                     self.change_ip(config_name)
                     allegro = AllegroAutoBuyer(login, password)

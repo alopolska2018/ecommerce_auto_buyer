@@ -132,4 +132,5 @@ class AllegroAutoBuyer:
             return True
         except NoSuchElementException:
             self.browser.close()
+            return False
             pass

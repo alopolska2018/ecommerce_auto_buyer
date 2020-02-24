@@ -22,8 +22,8 @@ def read_file(filename):
 
     return auction_numbers
 
-def read_json_file(filename):
-    with open(filename, 'r') as json_file:
+def read_json_file(account_name):
+    with open('{}_accounts.json'.format(account_name), 'r') as json_file:
         json_data = json.load(json_file)
         return json_data
 
@@ -143,18 +143,18 @@ def run():
     logger.info('Chosen file {}'.format(filename))
     choice = input('Modify price of auctions? [y/n]: ')
     logger.info('Modified price option= {}'.format(choice))
+    account_name = input('Provide allegro account name you are going to buy from: ')
+    msg = 'Account buying from: {}'.format(account_name)
+    print_and_log(msg)
     #id of login being used
     n = 0
 
-    json_accounts = read_json_file('accounts.json')
+    json_accounts = read_json_file(account_name)
     accounts_list = get_accounts_list(json_accounts)
 
     if choice == 'y':
         percentage_decrease = input('What percentage do you want to decrease price by:  ')
-        account_name = input('Provide allegro account name you are going to buy from: ')
         msg = 'Percentage decrease: {}'.format(percentage_decrease)
-        print_and_log(msg)
-        msg = 'Account buying from: {}'.format(account_name)
         print_and_log(msg)
 
         auction_numbers = read_file(filename)
