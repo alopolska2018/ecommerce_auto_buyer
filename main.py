@@ -60,20 +60,24 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
     original_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
     msg = 'Original price: {}'.format(original_price)
     print_and_log(msg)
-    modified_price = int(decrease_by_percentage(original_price, percentage_decrease))
-    msg = 'Modified price: {}'.format(modified_price)
-    print_and_log(msg)
-    allegro_price_modifier.modify_price(auction_number, modified_price, account_name)
-    msg = 'price has been modified'
-    print_and_log(msg)
-    current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
-    while current_price != modified_price:
-        sleep(120)
-        msg = 'current_price: {} is not equal modified price: {}'.format(current_price, modified_price)
-        print_and_log(msg, 'error')
+    if original_price == 1:
+        msg = 'Price is 1 no need to modify'
+        print_and_log(msg)
+    else:
+        modified_price = int(decrease_by_percentage(original_price, percentage_decrease))
+        msg = 'Modified price: {}'.format(modified_price)
+        print_and_log(msg)
+        allegro_price_modifier.modify_price(auction_number, modified_price, account_name)
+        msg = 'price has been modified'
+        print_and_log(msg)
         current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
-    msg = 'current price {}'.format(current_price)
-    print_and_log(msg)
+        while current_price != modified_price:
+            sleep(120)
+            msg = 'current_price: {} is not equal modified price: {}'.format(current_price, modified_price)
+            print_and_log(msg, 'error')
+            current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
+        msg = 'current price {}'.format(current_price)
+        print_and_log(msg)
 
     config_name = get_config_name(login, json_accounts)
     change_ip(config_name)
@@ -87,16 +91,18 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
     auto_buyer.close_browser()
 
     change_ip_for_request()
-    allegro_price_modifier.increase_price(original_price, auction_number, account_name)
-    current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
-    while current_price != original_price:
-        msg = 'current_price: {} is not equal original price: {}. Change price manually'.format(current_price,
-                                                                                                original_price)
-        print_and_log(msg, 'error')
-        input('Price changed? [type y to continue]')
-        current_price = allegro_price_checker.get_offer_price(auction_number, account_name)
-    msg = 'Original price restored, current price: {}'.format(current_price)
-    print_and_log(msg)
+
+    if original_price != 1:
+        allegro_price_modifier.increase_price(original_price, auction_number, account_name)
+        current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
+        while current_price != original_price:
+            msg = 'current_price: {} is not equal original price: {}. Change price manually'.format(current_price,
+                                                                                              original_price)
+            print_and_log(msg, 'error')
+            input('Price changed? [type y to continue]')
+            current_price = allegro_price_checker.get_offer_price(auction_number, account_name)
+        msg = 'Original price restored, current price: {}'.format(current_price)
+        print_and_log(msg)
 
 def get_config_name(login, json_accounts):
     return json_accounts[login]
@@ -162,7 +168,7 @@ def run():
             if n == len(accounts_list):
                 n = 0
             login = get_account_login(accounts_list, n)
-            password = get_account_password(login)
+            password = get_account_password('default')
 
             msg = 'User buying: {}'.format(login)
             print_and_log(msg)
@@ -182,7 +188,7 @@ def run():
                 n = 0
             # if k == NUMBER_OF_PRODUCTS:
             login = get_account_login(accounts_list, n)
-            password = get_account_password(login)
+            password = get_account_password('default')
             config_name = get_config_name(login, json_accounts)
             change_ip(config_name)
 
