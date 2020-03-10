@@ -91,14 +91,15 @@ class AllegroAutoBuyer:
     def get_feedback_page(self):
         self.browser.get('https://allegro.pl/user-rating-landing-page/index')
 
-
-    def submit_feedback(self, allegro_login):
+    def prepare_feedback(self):
         self.get_feedback_page()
         sleep(4)
         self.accept_cookies_prompt()
         sleep(2)
         self.allegro_log_in()
         sleep(3)
+
+    def submit_feedback(self, allegro_login):
         current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
         current_feedback = current_feedback.lower()
 
