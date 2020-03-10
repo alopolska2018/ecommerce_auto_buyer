@@ -100,6 +100,8 @@ class AllegroAutoBuyer:
         sleep(3)
 
     def submit_feedback(self, allegro_login):
+        self.prepare_feedback()
+        sleep(3)
         current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
         current_feedback = current_feedback.lower()
 
@@ -108,7 +110,9 @@ class AllegroAutoBuyer:
                 self.browser.find_element_by_xpath('//a[@class="m-link m-link--non-visited m-color-teal"]').click()
             except NoSuchElementException:
                 print('No feedback entry for account {}'.format(allegro_login))
+                self.browser.close()
                 return False
+            sleep(2)
             current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
             current_feedback = current_feedback.lower()
 
@@ -141,6 +145,7 @@ class AllegroAutoBuyer:
         #clicking submit
         try:
             self.browser.find_element_by_xpath('//button[text()=\' wystaw ocenę \']').click()
+            sleep(2)
             self.browser.close()
             return True
         except NoSuchElementException:

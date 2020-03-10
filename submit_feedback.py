@@ -186,7 +186,7 @@ class Submit_Feedback():
                     flag = allegro.submit_feedback(allegro_account)
                     if flag:
                         feedback_allegro_accounts = {}
-                        feedback_allegro_accounts[allegro_login] = today
+                        feedback_allegro_accounts[allegro_account] = today
                         feedback_dict[login] = feedback_allegro_accounts
                         msg = 'Feedback submitted for login: {} and allegro account: {}'.format(login, allegro_account)
                         self.print_and_log(msg)
