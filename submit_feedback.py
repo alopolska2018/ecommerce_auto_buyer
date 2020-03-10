@@ -11,8 +11,9 @@ import logging, pathlib
 MAIN_DIR = pathlib.Path().absolute()
 
 class Submit_Feedback():
-    
+
     def __init__(self):
+        self.allegro_accounts = ['alopl', 'czemutaktanio', 'ugreen']
         self.logger = logging.Logger('feedback_log')
         self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
@@ -29,7 +30,7 @@ class Submit_Feedback():
             self.logger.info(msg)
         else:
             self.logger.error(msg)
-        
+
     def get_config_name(self, login, json_accounts):
         return json_accounts[login]
 
@@ -132,53 +133,68 @@ class Submit_Feedback():
             feedback_dict = self.get_feedback_dict()
         except FileNotFoundError:
             accounts = list(accounts_list.keys())
-            login = accounts[0]
-            config_name = self.get_config_name(login, accounts_list)
-            self.change_ip(config_name)
-            password = self.get_account_password(login)
-            allegro = AllegroAutoBuyer(login, password)
-            allegro.submit_feedback()
-            feedback_dict = {}
-            feedback_dict[login] = today
+            for login in accounts:
+                config_name = self.get_config_name(login, accounts_list)
+                self.change_ip(config_name)
+                password = self.get_account_password(login)
+                allegro = AllegroAutoBuyer(login, password)
+                allegro_login = self.allegro_accounts[0]
+                flag = allegro.submit_feedback(allegro_login)
+                if flag:
+                    feedback_dict = {}
+                    feedback_allegro_accounts = {}
+                    feedback_allegro_accounts[allegro_login] = today
+                    feedback_dict[login] = feedback_allegro_accounts
+                    self.save_feedback(feedback_dict)
+                    break
 
         for login in accounts_list.keys():
             config_name = self.get_config_name(login, accounts_list)
             msg = 'Trying login: {} with config: {}'.format(login, config_name)
             self.print_and_log(msg)
             password = self.get_account_password(login)
-            
-            if login not in feedback_dict.keys():
-                self.change_ip(config_name)
-                allegro = AllegroAutoBuyer(login, password)
-                #submit_feedback returns True if was able to submit feedback, if no feedback was available to submit return False
-                flag = allegro.submit_feedback()
-                if flag:
-                    feedback_dict[login] = today
-                    msg = 'Feedback submitted login: {}'.format(login)
+            for allegro_account in self.allegro_accounts:
+                try:
+                    msg = 'Trying to submit feedback for allegro account: {}'.format(allegro_account)
                     self.print_and_log(msg)
-                else:
-                    msg = 'Feedback not submitted login: {}'.format(login)
+                    last_submission = feedback_dict[login][allegro_account]
+                    msg = 'Last submission {}'.format(last_submission)
                     self.print_and_log(msg)
-            else:
-                last_submission = feedback_dict[login]
-                msg = 'Last submission {}'.format(last_submission)
-                self.print_and_log(msg)
-                elapsed = today - last_submission
-                last_submission = feedback_dict[login]
-                msg = 'Time elapsed {}'.format(elapsed)
-                self.print_and_log(msg)
-                if elapsed >= datetime.timedelta(days=8):
+                    elapsed = today - last_submission
+                    msg = 'Time elapsed {}'.format(elapsed)
+                    self.print_and_log(msg)
+                    if elapsed >= datetime.timedelta(days=8):
+                        self.change_ip(config_name)
+                        allegro = AllegroAutoBuyer(login, password)
+                        flag = allegro.submit_feedback()
+                        if flag:
+                            feedback_dict[login][allegro_account] = today
+                            msg = 'Feedback submitted for login: {} and allegro account: {}'.format(login,
+                                                                                                    allegro_account)
+                            self.print_and_log(msg)
+                            self.save_feedback(feedback_dict)
+                        else:
+                            msg = 'Feedback not submitted for login: {} and allegro account: {}'.format(login,
+                                                                                                        allegro_account)
+                            self.print_and_log(msg)
+                except KeyError:
+                    msg = 'Login or account does not exist in feedback_dict'
+                    self.print_and_log(msg)
                     self.change_ip(config_name)
                     allegro = AllegroAutoBuyer(login, password)
-                    flag = allegro.submit_feedback()
+                    #submit_feedback returns True if was able to submit feedback, if no feedback was available to submit return False
+                    flag = allegro.submit_feedback(allegro_account)
                     if flag:
-                        feedback_dict[login] = today
-                        msg = 'Feedback submitted login: {}'.format(login)
+                        feedback_allegro_accounts = {}
+                        feedback_allegro_accounts[allegro_login] = today
+                        feedback_dict[login] = feedback_allegro_accounts
+                        msg = 'Feedback submitted for login: {} and allegro account: {}'.format(login, allegro_account)
                         self.print_and_log(msg)
+                        self.save_feedback(feedback_dict)
                     else:
-                        msg = 'Feedback not submitted login: {}'.format(login)
+                        msg = 'Feedback not submitted for login: {} and allegro account: {}'.format(login, allegro_account)
                         self.print_and_log(msg)
-            self.save_feedback(feedback_dict)
+
 
 if __name__ == "__main__":
     feedback = Submit_Feedback()

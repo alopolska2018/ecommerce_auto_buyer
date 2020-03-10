@@ -91,13 +91,25 @@ class AllegroAutoBuyer:
     def get_feedback_page(self):
         self.browser.get('https://allegro.pl/user-rating-landing-page/index')
 
-    def submit_feedback(self):
+
+    def submit_feedback(self, allegro_login):
         self.get_feedback_page()
         sleep(4)
         self.accept_cookies_prompt()
         sleep(2)
         self.allegro_log_in()
         sleep(3)
+        current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
+        current_feedback = current_feedback.lower()
+
+        while current_feedback != allegro_login:
+            try:
+                self.browser.find_element_by_xpath('//a[@class="m-link m-link--non-visited m-color-teal"]').click()
+            except NoSuchElementException:
+                print('No feedback entry for account {}'.format(allegro_login))
+                return False
+            current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
+            current_feedback = current_feedback.lower()
 
         try:
             self.browser.find_element_by_xpath('//*[text()=\' Polecam \']').click()
