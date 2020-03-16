@@ -45,12 +45,18 @@ class OpenVpn():
             print(msg)
             backup_config = os.listdir('C:\Program Files\OpenVPN\config')
             for config in reversed(backup_config):
+                msg = 'Trying to connect using: {} instead'.format(config)
+                logger.info(msg)
+                print(msg)
                 cmd = 'openvpn-gui.exe --command connect {}'.format(config)
                 output = subprocess.run(cmd, universal_newlines=True, shell=True, stdout=subprocess.PIPE,
                                         stderr=subprocess.PIPE)
                 time.sleep(15)
                 connected = self.check_connection()
                 if connected == True:
+                    msg = 'Successfully connected with: {}'.format(config)
+                    logger.info(msg)
+                    print(msg)
                     return True
 
     def disconnect(self):
