@@ -22,8 +22,8 @@ def read_file(filename):
 
     return auction_numbers
 
-def read_json_file(account_name):
-    with open('{}_accounts.json'.format(account_name), 'r') as json_file:
+def read_json_file():
+    with open('accounts.json', 'r') as json_file:
         json_data = json.load(json_file)
         return json_data
 
@@ -38,9 +38,17 @@ def get_account_login(accounts_list, n):
     login = accounts_list[n]
     return login
 
+def save_acounts_pasword(login, password):
+    keyring.set_password('allegro', '{}'.format(login), '{}'.format(password))
+
 def get_account_password(login):
     password = keyring.get_password('allegro', login)
-    return password
+    if password:
+        return password
+    else:
+        password = input('No existing pasword for login: {}. Please provide password: '.format(login))
+        save_acounts_pasword(login, password)
+        return password
 
 def decrease_by_percentage(number, percentage):
     result = number - (float(number)/100 * float(percentage))
@@ -155,7 +163,7 @@ def run():
     #id of login being used
     n = 0
 
-    json_accounts = read_json_file(account_name)
+    json_accounts = read_json_file()
     accounts_list = get_accounts_list(json_accounts)
 
     if choice == 'y':

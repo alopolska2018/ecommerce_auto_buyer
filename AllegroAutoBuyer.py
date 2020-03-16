@@ -102,8 +102,11 @@ class AllegroAutoBuyer:
     def submit_feedback(self, allegro_login):
         self.prepare_feedback()
         sleep(3)
-        current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
-        current_feedback = current_feedback.lower()
+        try:
+            current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
+            current_feedback = current_feedback.lower()
+        except:
+            pass
 
         while current_feedback != allegro_login:
             try:
@@ -120,7 +123,6 @@ class AllegroAutoBuyer:
             self.browser.find_element_by_xpath('//*[text()=\' Polecam \']').click()
         except NoSuchElementException:
             pass
-
         sleep(2)
         #clicking stars
         try:

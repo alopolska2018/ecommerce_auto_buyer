@@ -4,3 +4,4 @@ ecommerce_auto_buyer_log.log
 log_files/feedback_dict
 geckodriver.exe
 test.py
+add_passwords.py

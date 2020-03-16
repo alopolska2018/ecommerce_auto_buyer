@@ -17,7 +17,6 @@ class Submit_Feedback():
         self.logger = logging.Logger('feedback_log')
         self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
-
         main_dir = pathlib.Path().absolute()
         fh = logging.FileHandler('{}/log_files/feedback.log'.format(main_dir))
         fh.setFormatter(formatter)
@@ -96,12 +95,8 @@ class Submit_Feedback():
         return allegro_date_difference.days
 
     def get_list_of_accounts(self):
-        with open('alopl_accounts.json', 'r') as json_file:
-            alopl = json.load(json_file)
-        with open('czemutaktanio_accounts.json', 'r') as json_file:
-            czemutaktanio = json.load(json_file)
-        accounts = {**alopl, **czemutaktanio}
-        return accounts
+        with open('accounts.json', 'r') as json_file:
+            return json.load(json_file)
 
     def save_acounts_pasword(self, login, password):
         keyring.set_password('allegro', '{}'.format(login), '{}'.format(password))
@@ -149,6 +144,11 @@ class Submit_Feedback():
                     break
 
         for login in accounts_list.keys():
+            try:
+                feedback_allegro_accounts = feedback_dict[login]
+            except KeyError:
+                feedback_allegro_accounts = {}
+
             config_name = self.get_config_name(login, accounts_list)
             msg = 'Trying login: {} with config: {}'.format(login, config_name)
             self.print_and_log(msg)
@@ -185,7 +185,6 @@ class Submit_Feedback():
                     #submit_feedback returns True if was able to submit feedback, if no feedback was available to submit return False
                     flag = allegro.submit_feedback(allegro_account)
                     if flag:
-                        feedback_allegro_accounts = {}
                         feedback_allegro_accounts[allegro_account] = today
                         feedback_dict[login] = feedback_allegro_accounts
                         msg = 'Feedback submitted for login: {} and allegro account: {}'.format(login, allegro_account)
