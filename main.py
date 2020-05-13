@@ -8,8 +8,9 @@ import keyring
 import json
 import traceback
 
-REQUEST_CONFIG_NAME = 'pl24.nordvpn.com.tcp'
+REQUEST_CONFIG_NAME = 'pl121.nordvpn.com.tcp.ovpn'
 #TODO https://stackoverflow.com/questions/24196932/how-can-i-get-the-ip-address-from-nic-in-python
+#TODO https://stackoverflow.com/questions/23013220/max-retries-exceeded-with-url-in-requests
 
 def read_file(filename):
     file = open(filename, 'r')
@@ -80,10 +81,11 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
         print_and_log(msg)
         current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
         while current_price != modified_price:
-            sleep(120)
             msg = 'current_price: {} is not equal modified price: {}'.format(current_price, modified_price)
             print_and_log(msg, 'error')
+            sleep(120)
             current_price = float(allegro_price_checker.get_offer_price(auction_number, account_name))
+
         msg = 'current price {}'.format(current_price)
         print_and_log(msg)
 
@@ -95,6 +97,7 @@ def modify_price_and_buy(auction_number, login, password, json_accounts, percent
     except Exception as e:
         logger.error(traceback.format_exc())
         print(e)
+        pass
 
     auto_buyer.close_browser()
 

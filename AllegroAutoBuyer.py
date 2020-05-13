@@ -72,7 +72,7 @@ class AllegroAutoBuyer:
             try:
                 self.browser.find_element_by_xpath('//span[text()=\'List polecony priorytetowy\']').click()
             except Exception:
-                self.browser.find_element_by_xpath('//span[text()=\'List polecony ekonomiczny\']')
+                self.browser.find_element_by_xpath('//span[text()=\'List polecony ekonomiczny\']').click()
 
         sleep(3)
         self.browser.find_element_by_xpath('//div[contains(@class, \'cash-transfer\')]').click()
@@ -99,58 +99,78 @@ class AllegroAutoBuyer:
         self.allegro_log_in()
         sleep(3)
 
+    def check_feedback_availability(self):
+        try:
+            self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]')
+            return True
+        except NoSuchElementException:
+            return False
+
+    def submit_product_review(self):
+        self.browser.get('https://allegro.pl/opinie-produktowe/dodaj-opinie')
+        self.browser.find_element_by_xpath("//span[6]").click()
+        self.browser.find_element_by_xpath("(//button[@type='button'])[13]").click()
+
     def submit_feedback(self, allegro_login):
         self.prepare_feedback()
         sleep(3)
         try:
-            current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
-            current_feedback = current_feedback.lower()
+            self.submit_product_review()
         except:
             pass
-
-        while current_feedback != allegro_login:
+        self.get_feedback_page()
+        feedback_available = self.check_feedback_availability()
+        if feedback_available:
             try:
-                self.browser.find_element_by_xpath('//a[@class="m-link m-link--non-visited m-color-teal"]').click()
+                current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
+                current_feedback = current_feedback.lower()
+            except:
+                pass
+
+            while current_feedback != allegro_login:
+                try:
+                    self.browser.find_element_by_xpath('//a[@class="m-link m-link--non-visited m-color-teal"]').click()
+                except NoSuchElementException:
+                    print('No feedback entry for account {}'.format(allegro_login))
+                    self.browser.close()
+                    return False
+                sleep(2)
+                current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
+                current_feedback = current_feedback.lower()
+
+            try:
+                self.browser.find_element_by_xpath('//*[text()=\' Polecam \']').click()
             except NoSuchElementException:
-                print('No feedback entry for account {}'.format(allegro_login))
+                pass
+            sleep(2)
+            #clicking stars
+            try:
+                self.browser.find_element_by_xpath(
+                    "//div[@id='rating-module']/app-rate-order/div/section/div[2]/app-rating-seller-form/section/section/div/div/div[2]/app-description-star-rating/div/div/span[5]/i").click()
+            except NoSuchElementException:
+                pass
+
+            sleep(2)
+            try:
+                self.browser.find_element_by_xpath(
+                    "//div[@id='rating-module']/app-rate-order/div/section/div[2]/app-rating-seller-form/section/section/div[2]/div/div[2]/app-delivery-cost-star-rating/div/div/span[5]/i").click()
+            except NoSuchElementException:
+                pass
+            sleep(3)
+            try:
+                self.browser.find_element_by_xpath(
+                    "//div[@id='rating-module']/app-rate-order/div/section/div[2]/app-rating-seller-form/section/section/div[3]/div/div[2]/app-service-star-rating/div/div/span[5]/i").click()
+            except NoSuchElementException:
+                pass
+            sleep(5)
+            #clicking submit
+            try:
+                self.browser.find_element_by_xpath('//button[text()=\' wystaw ocenę \']').click()
+                sleep(2)
+                self.browser.close()
+                return True
+            except NoSuchElementException:
                 self.browser.close()
                 return False
-            sleep(2)
-            current_feedback = self.browser.find_element_by_xpath('//p[@class="m-heading m-heading--sm"]').text
-            current_feedback = current_feedback.lower()
-
-        try:
-            self.browser.find_element_by_xpath('//*[text()=\' Polecam \']').click()
-        except NoSuchElementException:
-            pass
-        sleep(2)
-        #clicking stars
-        try:
-            self.browser.find_element_by_xpath(
-                "//div[@id='rating-module']/app-rate-order/div/section/div[2]/app-rating-seller-form/section/section/div/div/div[2]/app-description-star-rating/div/div/span[5]/i").click()
-        except NoSuchElementException:
-            pass
-
-        sleep(2)
-        try:
-            self.browser.find_element_by_xpath(
-                "//div[@id='rating-module']/app-rate-order/div/section/div[2]/app-rating-seller-form/section/section/div[2]/div/div[2]/app-delivery-cost-star-rating/div/div/span[5]/i").click()
-        except NoSuchElementException:
-            pass
-        sleep(3)
-        try:
-            self.browser.find_element_by_xpath(
-                "//div[@id='rating-module']/app-rate-order/div/section/div[2]/app-rating-seller-form/section/section/div[3]/div/div[2]/app-service-star-rating/div/div/span[5]/i").click()
-        except NoSuchElementException:
-            pass
-        sleep(5)
-        #clicking submit
-        try:
-            self.browser.find_element_by_xpath('//button[text()=\' wystaw ocenę \']').click()
-            sleep(2)
-            self.browser.close()
-            return True
-        except NoSuchElementException:
-            self.browser.close()
-            return False
-            pass
+                pass
+        return False

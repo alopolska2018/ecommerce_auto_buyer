@@ -43,8 +43,10 @@ class OpenVpn():
             msg = 'Failed to connect using config: '.format(self.config_name)
             logger.error(msg)
             print(msg)
-            backup_config = os.listdir('C:\Program Files\OpenVPN\config')
-            for config in reversed(backup_config):
+            # backup_config = os.listdir('C:\Program Files\OpenVPN\config')
+            backup_config_list = ['pl120.nordvpn.com.tcp.ovpn','pl119.nordvpn.com.tcp.ovpn', 'pl118.nordvpn.com.tcp.ovpn', 'pl117.nordvpn.com.tcp.ovpn',
+                                  'pl116.nordvpn.com.tcp.ovpn', 'pl115.nordvpn.com.tcp.ovpn', 'pl114.nordvpn.com.tcp.ovpn']
+            for config in backup_config_list:
                 msg = 'Trying to connect using: {} instead'.format(config)
                 logger.info(msg)
                 print(msg)
