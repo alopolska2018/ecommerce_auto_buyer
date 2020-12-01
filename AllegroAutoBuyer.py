@@ -1,5 +1,4 @@
 from selenium import webdriver
-from selenium.webdriver.firefox.options import Options
 from time import sleep
 from selenium.common.exceptions import NoSuchElementException
 
@@ -8,28 +7,30 @@ class AllegroAutoBuyer:
     def __init__(self, login, password):
         self.login = login
         self.password = password
-        self.options = Options()
-        self.options.headless = False
-        self.browser_locale = 'pl'
-        self.profile = webdriver.FirefoxProfile()
-        self.profile.set_preference('intl.accept_languages', self.browser_locale)
-
-        self.browser = webdriver.Firefox(options=self.options, firefox_profile=self.profile)
-        self.browser.delete_all_cookies()
+        self.browser = webdriver.Chrome('chromedriver.exe')
         self.browser.set_window_size(1800, 600)
         self.browser.set_window_position(0, 0)
-        self.accept_next_alert = True
+        self.browser.delete_all_cookies()
 
     def buy_with_login(self, auction_number):
         self.get_product_page(auction_number)
-        sleep(1)
+        sleep(3)
         self.accept_cookies_prompt()
-        sleep(1)
+        sleep(4)
+        self.accept_age_warning()
+        sleep(2)
         self.click_buy_it_now()
-        sleep(1)
+        sleep(2)
         self.allegro_log_in()
         sleep(2)
         self.fill_buying_form()
+
+    def accept_age_warning(self):
+        try:
+            elem = self.browser.find_element_by_xpath('//*[text()=\"tak mam 18 lat, idę dalej\"]')
+            elem.click()
+        except NoSuchElementException:
+            pass
 
     def buy_without_login(self, auction_number):
         self.get_product_page(auction_number)
@@ -39,7 +40,10 @@ class AllegroAutoBuyer:
         self.fill_buying_form()
 
     def click_buy_it_now(self):
-        self.browser.find_element_by_xpath('//button[@data-analytics-interaction-label="PreBuyNow"]').click()
+        self.browser.find_element_by_xpath('//*[text()="kup teraz"]').click()
+        # self.browser.find_element_by_xpath('//button[@id="buy-now-button"]').click()
+        # js = 'document.getElementById(\'{}\').click();'.format('buy-now-button')
+        # self.browser.execute_script(js)
 
     def allegro_log_in(self):
         self.browser.find_element_by_id("username").clear()
@@ -90,6 +94,7 @@ class AllegroAutoBuyer:
 
     def get_feedback_page(self):
         self.browser.get('https://allegro.pl/user-rating-landing-page/index')
+        sleep(3)
 
     def prepare_feedback(self):
         self.get_feedback_page()
@@ -98,6 +103,7 @@ class AllegroAutoBuyer:
         sleep(2)
         self.allegro_log_in()
         sleep(3)
+        self.close_feedback_prompt()
 
     def check_feedback_availability(self):
         try:
@@ -106,10 +112,12 @@ class AllegroAutoBuyer:
         except NoSuchElementException:
             return False
 
+    def close_feedback_prompt(self):
+        self.browser.find_element_by_xpath("/html/body/div[4]/div/div[5]/a[1]").click()
+
     def submit_product_review(self):
-        self.browser.get('https://allegro.pl/opinie-produktowe/dodaj-opinie')
         self.browser.find_element_by_xpath("//span[6]").click()
-        self.browser.find_element_by_xpath("(//button[@type='button'])[13]").click()
+        self.browser.find_element_by_xpath("//button[@type='button'])[13]").click()
 
     def submit_feedback(self, allegro_login):
         self.prepare_feedback()
@@ -173,4 +181,5 @@ class AllegroAutoBuyer:
                 self.browser.close()
                 return False
                 pass
+        self.browser.close()
         return False

@@ -13,7 +13,7 @@ MAIN_DIR = pathlib.Path().absolute()
 class Submit_Feedback():
 
     def __init__(self):
-        self.allegro_accounts = ['alopl', 'czemutaktanio', 'ugreen']
+        self.allegro_accounts = ['gafyzszafy']
         self.logger = logging.Logger('feedback_log')
         self.logger.setLevel(logging.INFO)
         formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
