@@ -22,7 +22,7 @@ class AllegroAutoBuyer:
         self.click_buy_it_now()
         sleep(2)
         self.allegro_log_in()
-        sleep(2)
+        sleep(8)
         self.fill_buying_form()
 
     def accept_age_warning(self):
@@ -71,20 +71,23 @@ class AllegroAutoBuyer:
 
     def fill_buying_form(self):
         try:
-            self.browser.find_element_by_xpath('//span[text()=\'List ekonomiczny\']').click()
+            elem = self.browser.find_element_by_xpath('//span[text()=\'List ekonomiczny\']')
+            elem.click()
         except Exception:
             try:
-                self.browser.find_element_by_xpath('//span[text()=\'List polecony priorytetowy\']').click()
+                elem = self.browser.find_element_by_xpath('//span[text()=\'List polecony priorytetowy\']').click()
+                elem.click()
             except Exception:
-                self.browser.find_element_by_xpath('//span[text()=\'List polecony ekonomiczny\']').click()
+                elem = self.browser.find_element_by_xpath('//span[text()=\'List polecony ekonomiczny\']')
+                elem.click()
 
-        sleep(3)
+        sleep(6)
         self.browser.find_element_by_xpath('//div[contains(@class, \'cash-transfer\')]').click()
-        sleep(3)
+        sleep(6)
         self.browser.find_element_by_xpath('//div[contains(text(),\'Płacę przelewem tradycyjnym\')]').click()
-        sleep(3)
+        sleep(6)
         self.browser.find_element_by_xpath('//span[contains(text(),\'kupuję i płacę\')]').click()
-        sleep(5)
+        sleep(6)
 
     def home_page(self):
         self.browser.get('https://allegro.pl/')
@@ -94,16 +97,26 @@ class AllegroAutoBuyer:
 
     def get_feedback_page(self):
         self.browser.get('https://allegro.pl/user-rating-landing-page/index')
-        sleep(3)
+
+    def close_number_prompt(self):
+        try:
+            element = self.browser.find_element_by_xpath('//*[text()="Potwierdź dane"]')
+            element.click()
+        except NoSuchElementException:
+            pass
 
     def prepare_feedback(self):
         self.get_feedback_page()
-        sleep(4)
+        sleep(10)
         self.accept_cookies_prompt()
-        sleep(2)
+        sleep(5)
         self.allegro_log_in()
-        sleep(3)
+        sleep(10)
+        self.close_number_prompt()
+        sleep(7)
         self.close_feedback_prompt()
+
+
 
     def check_feedback_availability(self):
         try:
@@ -113,7 +126,11 @@ class AllegroAutoBuyer:
             return False
 
     def close_feedback_prompt(self):
-        self.browser.find_element_by_xpath("/html/body/div[4]/div/div[5]/a[1]").click()
+        try:
+            element = self.browser.find_element_by_xpath('//a[@class="introjs-button introjs-skipbutton"][@role="button"]')
+            element.click()
+        except NoSuchElementException:
+            pass
 
     def submit_product_review(self):
         self.browser.find_element_by_xpath("//span[6]").click()
