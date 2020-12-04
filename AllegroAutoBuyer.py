@@ -11,6 +11,7 @@ class AllegroAutoBuyer:
         self.browser.set_window_size(1800, 600)
         self.browser.set_window_position(0, 0)
         self.browser.delete_all_cookies()
+        self.num_of_tries = 0
 
     def buy_with_login(self, auction_number):
         self.get_product_page(auction_number)
@@ -97,6 +98,16 @@ class AllegroAutoBuyer:
 
     def get_feedback_page(self):
         self.browser.get('https://allegro.pl/user-rating-landing-page/index')
+        sleep(5)
+        #Check if page was loaded correctly if not reload
+        try:
+            element = self.browser.find_element_by_xpath('//button[@type=\'button\'][@data-role=\'accept-consent\']')
+        except NoSuchElementException:
+            self.num_of_tries += 1
+            if self.num_of_tries <= 3:
+                self.get_feedback_page()
+            else:
+                self.num_of_tries = 0
 
     def close_number_prompt(self):
         try:
@@ -137,13 +148,15 @@ class AllegroAutoBuyer:
         self.browser.find_element_by_xpath("//button[@type='button'])[13]").click()
 
     def submit_feedback(self, allegro_login):
-        self.prepare_feedback()
-        sleep(3)
+        try:
+            self.prepare_feedback()
+            sleep(3)
+        except:
+            return False
         try:
             self.submit_product_review()
         except:
-            pass
-        self.get_feedback_page()
+            return False
         feedback_available = self.check_feedback_availability()
         if feedback_available:
             try:
